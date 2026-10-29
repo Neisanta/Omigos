@@ -1,0 +1,15 @@
+# Dados pessoais dos usuários — nunca versionar
+uploads/
+foto_users/
+
+# Dump do banco com dados de pessoas (use omigos_schema.sql)
+omigos_chatphp.sql
+
+# Configuração local
+.env
+*.local
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini

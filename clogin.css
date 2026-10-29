@@ -1,0 +1,188 @@
+/* Login — Omigos Chat (moderno, responsivo) */
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #4f6ef7;
+    --primary-dark: #3d5ae0;
+    --danger: #ef4444;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body, html {
+    height: 100%;
+    font-family: var(--font);
+}
+
+.background {
+    background-image: linear-gradient(rgba(15, 20, 32, 0.55), rgba(15, 20, 32, 0.65)), url('img/fundor.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 1.25rem;
+}
+
+.wrapper {
+    width: 100%;
+    max-width: 400px;
+    padding: 2.2rem 2rem 1.8rem;
+    background: rgba(20, 26, 42, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    text-align: center;
+    color: #eef1f7;
+    animation: cardIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.brand {
+    margin-bottom: 1.1rem;
+}
+
+.brand-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    border-radius: 16px;
+}
+
+.wrapper h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    letter-spacing: -0.01em;
+}
+
+.error {
+    background: rgba(239, 68, 68, 0.16);
+    border: 1px solid rgba(239, 68, 68, 0.55);
+    color: #ffb4b4;
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    margin-bottom: 1rem;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.input-box {
+    position: relative;
+    display: flex;
+    margin-bottom: 0.9rem;
+}
+
+.input-box input {
+    width: 100%;
+    height: 46px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1.5px solid transparent;
+    outline: none;
+    border-radius: 40px;
+    padding: 0.6rem 1.2rem 0.6rem 2.8rem;
+    font-size: 0.95rem;
+    color: #1e2430;
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.input-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.25);
+}
+
+.input-box .bx {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    color: #5a6478;
+    pointer-events: none;
+}
+
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.86rem;
+    margin: 0.4rem 0.2rem 1.1rem;
+}
+
+.remember-forgot label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+}
+
+.remember-forgot label input {
+    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.btn {
+    width: 100%;
+    height: 46px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(79, 110, 247, 0.4);
+}
+
+.btn:active { transform: scale(0.98); }
+
+.register-link {
+    font-size: 0.88rem;
+    margin-top: 1.2rem;
+}
+
+.register-link a {
+    color: #aebcff;
+    font-weight: 600;
+}
+
+.register-link a:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+    .wrapper {
+        padding: 1.6rem 1.2rem 1.4rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
