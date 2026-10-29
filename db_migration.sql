@@ -1,55 +1,56 @@
--- Migração de otimização para Omigos Chat
--- Executa-se após o setup inicial do banco de dados
--- Preserva todos os dados existentes
+-- =============================================================
+-- Omigos Chat — migração do schema legado para o código atual
+--
+-- Use este arquivo apenas em uma instalação antiga que já possui
+-- as tabelas do dump original. Novas instalações devem importar
+-- diretamente omigos_schema.sql.
+--
+-- Faça backup antes de executar. Cada ALTER deve ser executado
+-- uma única vez; em uma base já migrada, pule o comando correspondente.
+-- =============================================================
 
--- --------------------------------------------------------
--- Índices para tabela `messages`
--- --------------------------------------------------------
--- Adicionar índice em sent_at para otimizar exclusão de mensagens antigas
-ALTER TABLE `messages`
-  ADD INDEX `idx_messages_sent_at` (`sent_at`);
-
--- Adicionar índice composto para buscas por conversa
-ALTER TABLE `messages`
-  ADD INDEX `idx_messages_conversation_sender` (`conversation_id`, `sender_id`);
-
--- Adicionar índice para receiver_id em queries de carregamento
-ALTER TABLE `messages`
-  ADD INDEX `idx_messages_receiver_id` (`receiver_id`);
-
--- --------------------------------------------------------
--- Índices para tabela `unread_messages`
--- --------------------------------------------------------
--- Otimizar contagem de mensagens não lidas
-ALTER TABLE `unread_messages`
-  ADD INDEX `idx_unread_messages_user` (`user_id`, `message_id`);
-
--- Adicionar índice composto para exclusão em cascata
-ALTER TABLE `unread_messages`
-  ADD INDEX `idx_unread_messages_sender` (`message_id`, `user_id`);
-
--- --------------------------------------------------------
--- Índices para tabela `conversations`
--- --------------------------------------------------------
--- Otimizar busca de conversas existentes
-ALTER TABLE `conversations`
-  ADD INDEX `idx_conversations_users` (`user1_id`, `user2_id`);
-
--- --------------------------------------------------------
--- Índices para tabela `users`
--- --------------------------------------------------------
--- Já existe UNIQUE KEY username, mas garantir performance em buscas
+-- Sessão "lembrar de mim" e presença do usuário.
 ALTER TABLE `users`
-  MODIFY `username` VARCHAR(50) NOT NULL,
-  ADD INDEX `idx_users_course` (`curso`);
+  ADD COLUMN `remember_token` CHAR(64) NULL AFTER `is_admin`,
+  ADD COLUMN `remember_expiry` DATETIME NULL AFTER `remember_token`,
+  ADD COLUMN `last_active` DATETIME NULL AFTER `remember_expiry`;
 
--- --------------------------------------------------------
--- Atualizar configuração de exclusão de mensagens (opcional)
--- --------------------------------------------------------
--- Atualizar tempo padrão de exclusão para 30 dias (2592000 segundos)
-UPDATE `settings` SET `value` = '2592000' WHERE `name` = 'message_deletion_time';
+-- Edição de mensagens e anexos de imagem.
+ALTER TABLE `messages`
+  ADD COLUMN `edited_at` DATETIME NULL AFTER `sent_at`,
+  ADD COLUMN `file_path` VARCHAR(255) NULL AFTER `edited_at`,
+  ADD COLUMN `file_name` VARCHAR(255) NULL AFTER `file_path`,
+  ADD COLUMN `file_type` VARCHAR(100) NULL AFTER `file_name`;
 
--- --------------------------------------------------------
--- Relatório de alterações
--- --------------------------------------------------------
-SELECT 'Índices aplicados com sucesso' AS status;
+-- Indicador de "digitando...".
+CREATE TABLE IF NOT EXISTS `typing_status` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `conversation_key` VARCHAR(64) NOT NULL,
+  `user_id` INT NOT NULL,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_typing_conversation_user` (`conversation_key`, `user_id`),
+  KEY `idx_typing_updated_at` (`updated_at`),
+  CONSTRAINT `fk_typing_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Índices usados pelas consultas de mensagens e não lidas.
+ALTER TABLE `messages`
+  ADD INDEX `idx_messages_sent_at` (`sent_at`),
+  ADD INDEX `idx_messages_conversation_sender` (`conversation_id`, `sender_id`),
+  ADD INDEX `idx_messages_receiver` (`receiver_id`, `sent_at`);
+
+ALTER TABLE `unread_messages`
+  ADD INDEX `idx_unread_user_message` (`user_id`, `message_id`),
+  ADD INDEX `idx_unread_message_user` (`message_id`, `user_id`);
+
+ALTER TABLE `conversations`
+  ADD INDEX `idx_conversations_user2` (`user2_id`);
+
+ALTER TABLE `users`
+  ADD INDEX `idx_users_course` (`curso`),
+  ADD INDEX `idx_users_last_active` (`last_active`);
+
+-- Configuração padrão: retenção de mensagens em 30 dias.
+INSERT IGNORE INTO `settings` (`name`, `value`) VALUES ('message_deletion_time', '2592000');
